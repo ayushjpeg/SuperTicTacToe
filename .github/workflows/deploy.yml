@@ -1,0 +1,42 @@
+name: Build and Deploy Super TTT
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: [self-hosted, linux]
+    env:
+      BACKEND_URL: ${{ secrets.BACKEND_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build Docker image
+        run: docker build --build-arg BACKEND_URL="$BACKEND_URL" -t superttt:latest .
+
+      - name: Stop existing container (if any)
+        run: docker rm -f superttt || true
+
+      - name: Run new container
+        run: |
+          docker run -d --restart unless-stopped \
+            --name superttt \
+            -p 8013:8013 \
+            superttt:latest
