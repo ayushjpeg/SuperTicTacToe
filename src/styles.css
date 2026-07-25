@@ -1,16 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-1: #051018;
-  --bg-2: #0b1f2b;
-  --panel: rgba(6, 18, 30, 0.68);
-  --panel-border: rgba(129, 225, 255, 0.2);
-  --text: #e9f7ff;
-  --muted: #9bc1d4;
-  --accent: #5ce1ff;
-  --accent-2: #ffba66;
-  --x: #5ce1ff;
-  --o: #ffba66;
+  --bg-1: #0b1a26;
+  --bg-2: #132a3c;
+  --panel: rgba(18, 34, 49, 0.82);
+  --panel-border: rgba(145, 219, 255, 0.28);
+  --text: #f2f8ff;
+  --muted: #bfd4e5;
+  --accent: #72e1ff;
+  --accent-2: #ffd07f;
+  --x: #7fe8ff;
+  --o: #ffd892;
+  --board-line: rgba(156, 227, 255, 0.2);
+  --board-cell: rgba(25, 47, 66, 0.88);
+  --board-cell-hover: rgba(37, 70, 96, 0.95);
+  --won-x-bg: linear-gradient(155deg, rgba(32, 98, 132, 0.95), rgba(23, 66, 94, 0.95));
+  --won-o-bg: linear-gradient(155deg, rgba(142, 99, 42, 0.95), rgba(99, 67, 26, 0.95));
+  --won-draw-bg: linear-gradient(155deg, rgba(78, 86, 95, 0.92), rgba(54, 60, 67, 0.92));
 }
 
 * {
@@ -23,8 +29,9 @@ body {
   font-family: 'Rajdhani', sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 10% 15%, rgba(92, 225, 255, 0.16), transparent 28%),
-    radial-gradient(circle at 88% 22%, rgba(255, 186, 102, 0.13), transparent 30%),
+    radial-gradient(circle at 10% 15%, rgba(114, 225, 255, 0.2), transparent 30%),
+    radial-gradient(circle at 88% 22%, rgba(255, 208, 127, 0.17), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(78, 142, 186, 0.12), transparent 36%),
     linear-gradient(145deg, var(--bg-1), var(--bg-2));
 }
 
@@ -119,7 +126,7 @@ body {
   border-radius: 22px;
   background: var(--panel);
   backdrop-filter: blur(16px);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.36);
 }
 
 .panel--lobby {
@@ -192,7 +199,7 @@ select {
 button {
   border: 1px solid rgba(233, 247, 255, 0.25);
   color: var(--text);
-  background: rgba(7, 24, 39, 0.7);
+  background: rgba(17, 40, 58, 0.78);
   border-radius: 10px;
   padding: 8px 12px;
   transition: transform 140ms ease, background 140ms ease;
@@ -200,7 +207,7 @@ button {
 
 button:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: rgba(10, 34, 54, 0.86);
+  background: rgba(29, 60, 84, 0.92);
 }
 
 button:disabled {
@@ -276,6 +283,7 @@ select {
 .bot-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .link-invite {
@@ -336,6 +344,8 @@ select {
 .board {
   display: grid;
   gap: 10px;
+  width: min(100%, 760px);
+  margin: 0 auto;
 }
 
 .board__row {
@@ -346,21 +356,36 @@ select {
 
 .subgrid {
   position: relative;
-  border: 2px solid rgba(129, 225, 255, 0.22);
+  border: 2px solid var(--board-line);
   border-radius: 14px;
   padding: 6px;
-  background: rgba(7, 26, 40, 0.8);
+  background: rgba(16, 34, 49, 0.9);
   display: grid;
   gap: 6px;
 }
 
 .subgrid--targeted {
   border-color: var(--accent-2);
-  box-shadow: 0 0 0 1px rgba(255, 186, 102, 0.25), 0 0 28px rgba(255, 186, 102, 0.18);
+  box-shadow: 0 0 0 1px rgba(255, 208, 127, 0.28), 0 0 30px rgba(255, 208, 127, 0.22);
 }
 
 .subgrid--free {
   border-style: dashed;
+}
+
+.subgrid--won-x {
+  border-color: rgba(127, 232, 255, 0.75);
+  background: var(--won-x-bg);
+}
+
+.subgrid--won-o {
+  border-color: rgba(255, 216, 146, 0.75);
+  background: var(--won-o-bg);
+}
+
+.subgrid--won-draw {
+  border-color: rgba(185, 194, 203, 0.65);
+  background: var(--won-draw-bg);
 }
 
 .subgrid__winner {
@@ -369,11 +394,13 @@ select {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: rgba(2, 11, 18, 0.65);
+  background: rgba(8, 18, 27, 0.5);
   z-index: 5;
   font-family: 'Cinzel', serif;
-  font-size: 2rem;
+  font-size: clamp(2.5rem, 3.8vw, 3.6rem);
+  font-weight: 700;
   letter-spacing: 0.1em;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .subgrid__row {
@@ -385,16 +412,17 @@ select {
 .cell {
   aspect-ratio: 1;
   border-radius: 10px;
-  border: 1px solid rgba(129, 225, 255, 0.25);
-  background: rgba(2, 14, 24, 0.86);
+  border: 1px solid rgba(157, 224, 255, 0.22);
+  background: var(--board-cell);
   font-family: 'Cinzel', serif;
   font-size: clamp(1.1rem, 2vw, 1.7rem);
 }
 
 .cell--filled {
-  color: #f6f7fa;
+  color: #f2f7fd;
   font-weight: 700;
-  background: linear-gradient(155deg, rgba(16, 37, 56, 0.9), rgba(12, 29, 45, 0.88));
+  background: linear-gradient(155deg, rgba(31, 58, 80, 0.94), rgba(22, 43, 61, 0.92));
+  text-shadow: 0 0 10px rgba(210, 233, 255, 0.24);
 }
 
 .cell--x {
@@ -409,7 +437,8 @@ select {
 
 .cell--playable {
   border-color: rgba(255, 255, 255, 0.65);
-  background: linear-gradient(160deg, rgba(10, 35, 54, 0.95), rgba(8, 27, 44, 0.88));
+  background: linear-gradient(160deg, var(--board-cell-hover), rgba(24, 50, 70, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .games-row {
@@ -454,5 +483,103 @@ select {
 
   .match-strip__center {
     text-align: left;
+  }
+}
+
+@media (max-width: 768px) {
+  .arena {
+    width: min(100%, calc(100% - 12px));
+    margin: 10px auto 20px;
+    gap: 10px;
+  }
+
+  .panel {
+    border-radius: 16px;
+  }
+
+  .panel--lobby,
+  .panel--game {
+    padding: 12px;
+  }
+
+  .panel__header {
+    gap: 10px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .panel__header h1 {
+    font-size: 1.3rem;
+  }
+
+  .panel__header--wide p {
+    font-size: 0.9rem;
+  }
+
+  .number-bar__buttons {
+    gap: 6px;
+  }
+
+  .number-pill {
+    width: 34px;
+    height: 34px;
+  }
+
+  .board {
+    gap: 6px;
+  }
+
+  .board__row {
+    gap: 6px;
+  }
+
+  .subgrid {
+    border-width: 1.5px;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .subgrid__row {
+    gap: 4px;
+  }
+
+  .cell {
+    border-radius: 7px;
+    font-size: clamp(0.82rem, 4.5vw, 1.15rem);
+  }
+
+  .subgrid__winner {
+    inset: 4px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+  }
+
+  .match-strip {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .badge {
+    padding: 6px 8px;
+  }
+
+  .badge__name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 420px) {
+  .number-pill {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  .cell {
+    font-size: clamp(0.76rem, 4.8vw, 1rem);
   }
 }

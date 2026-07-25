@@ -79,10 +79,13 @@ function GameBoard({ game, selectedValue, onPlay }) {
             const subWinner = game?.subgrid_state?.[boardRow]?.[boardCol]
             const isTargeted = game?.next_board_row === boardRow && game?.next_board_col === boardCol
             const isGlobalFreeMove = game?.next_board_row == null || game?.next_board_col == null
+            const winnerClass = subWinner === 'X'
+              ? 'subgrid--won-x'
+              : (subWinner === 'O' ? 'subgrid--won-o' : (subWinner === 'D' ? 'subgrid--won-draw' : ''))
             return (
               <div
                 key={`b-${boardRow}-${boardCol}`}
-                className={`subgrid ${isTargeted ? 'subgrid--targeted' : ''} ${isGlobalFreeMove ? 'subgrid--free' : ''}`}
+                className={`subgrid ${winnerClass} ${isTargeted ? 'subgrid--targeted' : ''} ${isGlobalFreeMove ? 'subgrid--free' : ''}`}
               >
                 {subWinner && <div className="subgrid__winner">{subWinner === 'D' ? 'TIE' : subWinner}</div>}
                 {Array.from({ length: 3 }).map((__, cellRow) => (
