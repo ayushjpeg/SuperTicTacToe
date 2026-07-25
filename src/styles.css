@@ -407,13 +407,14 @@ select {
 
 .subgrid__row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+  min-width: 0;
 }
 
 .cell {
   aspect-ratio: 1;
-  width: 100%;
+  min-width: 0;
   border-radius: 10px;
   border: 1px solid rgba(157, 224, 255, 0.22);
   background: var(--board-cell);
@@ -540,7 +541,7 @@ select {
     border-width: 1.5px;
     border-radius: 10px;
     padding: 4px;
-    gap: 4px;
+    gap: 3px;
   }
 
   .subgrid--targeted {
@@ -554,7 +555,7 @@ select {
   }
 
   .subgrid__row {
-    gap: 4px;
+    gap: 3px;
   }
 
   .cell {
