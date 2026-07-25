@@ -362,6 +362,8 @@ select {
   background: rgba(16, 34, 49, 0.9);
   display: grid;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .subgrid--targeted {
@@ -411,6 +413,7 @@ select {
 
 .cell {
   aspect-ratio: 1;
+  width: 100%;
   border-radius: 10px;
   border: 1px solid rgba(157, 224, 255, 0.22);
   background: var(--board-cell);
@@ -540,6 +543,16 @@ select {
     gap: 4px;
   }
 
+  .subgrid--targeted {
+    box-shadow: 0 0 0 1px rgba(255, 208, 127, 0.22), 0 0 12px rgba(255, 208, 127, 0.18);
+  }
+
+  .subgrid--won-x,
+  .subgrid--won-o,
+  .subgrid--won-draw {
+    box-shadow: none;
+  }
+
   .subgrid__row {
     gap: 4px;
   }
@@ -553,6 +566,7 @@ select {
     inset: 4px;
     border-radius: 8px;
     font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.42);
   }
 
   .match-strip {
@@ -569,6 +583,10 @@ select {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .panel--game {
+    overflow: hidden;
   }
 }
 
