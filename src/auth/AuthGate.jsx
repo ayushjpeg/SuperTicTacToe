@@ -64,10 +64,10 @@ export function AuthGate({ children }) {
     return (
       <div className="auth-shell auth-shell--splash">
         <div className="auth-card">
-          <p className="auth-card__eyebrow">Ultimate Tic Tac Toe</p>
+          <p className="auth-card__eyebrow">Number Tic Tac Toe</p>
           <h1 className="auth-card__title">Enter the arena</h1>
           <p className="auth-card__subtitle">
-            Sign in to challenge live players, send invite links, and start ranked-style Ultimate Tic Tac Toe sessions.
+            Sign in to challenge live players, send invite links, and start competitive Number Tic Tac Toe sessions.
           </p>
           {(authError || error) && <p className="auth-card__error">{authError || error}</p>}
           <button className="auth-card__button" onClick={startGoogleLogin}>Continue with Google</button>

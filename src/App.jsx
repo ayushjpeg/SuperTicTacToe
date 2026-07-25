@@ -15,8 +15,32 @@ import {
 } from './api/gameApi'
 
 const moveKey = (move) => `${move.board_row}-${move.board_col}-${move.cell_row}-${move.cell_col}`
+const NUMBER_RANGE = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 const toDisplayName = (user) => user?.full_name || user?.email?.split('@')[0] || 'Player'
+
+const getSubgridAvailableValues = (boardState, boardRow, boardCol) => {
+  const used = new Set()
+  const subgrid = boardState?.[boardRow]?.[boardCol] || []
+  for (const row of subgrid) {
+    for (const value of row || []) {
+      if (value != null) {
+        used.add(Number(value))
+      }
+    }
+  }
+  return NUMBER_RANGE.filter((value) => !used.has(value))
+}
+
+const getLegalNumberChoices = (game) => {
+  if (!game) return NUMBER_RANGE
+  const choices = new Set()
+  for (const move of game.legal_moves || []) {
+    const options = getSubgridAvailableValues(game.board_state, move.board_row, move.board_col)
+    for (const value of options) choices.add(value)
+  }
+  return NUMBER_RANGE.filter((value) => choices.has(value))
+}
 
 function PlayerBadge({ user, symbol, isBot }) {
   if (isBot) {
@@ -43,7 +67,7 @@ function PlayerBadge({ user, symbol, isBot }) {
   )
 }
 
-function GameBoard({ game, onPlay }) {
+function GameBoard({ game, selectedValue, onPlay }) {
   const legalMoveSet = useMemo(() => new Set((game?.legal_moves || []).map(moveKey)), [game])
   const canMove = game?.status === 'active' && game?.you_symbol && game?.you_symbol === game?.current_player
 
@@ -65,16 +89,20 @@ function GameBoard({ game, onPlay }) {
                   <div className="subgrid__row" key={`sr-${cellRow}`}>
                     {Array.from({ length: 3 }).map((___, cellCol) => {
                       const value = game?.board_state?.[boardRow]?.[boardCol]?.[cellRow]?.[cellCol]
-                      const playable = canMove && legalMoveSet.has(`${boardRow}-${boardCol}-${cellRow}-${cellCol}`)
+                      const canPlaceInSubgrid = getSubgridAvailableValues(game?.board_state, boardRow, boardCol).includes(selectedValue)
+                      const playable = canMove
+                        && selectedValue != null
+                        && canPlaceInSubgrid
+                        && legalMoveSet.has(`${boardRow}-${boardCol}-${cellRow}-${cellCol}`)
                       return (
                         <button
                           key={`c-${boardRow}-${boardCol}-${cellRow}-${cellCol}`}
                           type="button"
-                          className={`cell ${playable ? 'cell--playable' : ''} ${value === 'X' ? 'cell--x' : ''} ${value === 'O' ? 'cell--o' : ''}`}
-                          onClick={() => playable && onPlay({ board_row: boardRow, board_col: boardCol, cell_row: cellRow, cell_col: cellCol })}
+                          className={`cell ${playable ? 'cell--playable' : ''} ${value != null ? 'cell--filled' : ''}`}
+                          onClick={() => playable && onPlay({ board_row: boardRow, board_col: boardCol, cell_row: cellRow, cell_col: cellCol, value: selectedValue })}
                           disabled={!playable}
                         >
-                          {value || ''}
+                          {value ?? ''}
                         </button>
                       )
                     })}
@@ -99,8 +127,11 @@ export default function App() {
   const [inviteFromLink, setInviteFromLink] = useState(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [selectedValue, setSelectedValue] = useState(null)
 
   const selectedGameId = selectedGame?.id || null
+  const canPlayNow = selectedGame?.status === 'active' && selectedGame?.you_symbol && selectedGame?.you_symbol === selectedGame?.current_player
+  const legalNumberChoices = useMemo(() => getLegalNumberChoices(selectedGame), [selectedGame])
 
   const refreshLobby = async () => {
     const [activePlayers, incoming, outgoing, activeGames] = await Promise.all([
@@ -239,6 +270,10 @@ export default function App() {
 
   const handleMove = async (move) => {
     if (!selectedGameId) return
+    if (selectedValue == null) {
+      setMessage('Select a number from 1-9 first.')
+      return
+    }
     try {
       const game = await submitMove(selectedGameId, move)
       setSelectedGame(game)
@@ -317,8 +352,8 @@ export default function App() {
       <section className="panel panel--game">
         <div className="panel__header panel__header--wide">
           <div>
-            <h1>Ultimate Tic Tac Toe</h1>
-            <p>Multiplayer arena with forced-board tactical play.</p>
+            <h1>Number Tic Tac Toe</h1>
+            <p>Use numbers 1-9, keep each subgrid unique, and make 15-lines to claim boards.</p>
           </div>
           <div className="bot-actions">
             <button disabled={busy} onClick={() => handleCreateBotGame('X')}>Play bot as X</button>
@@ -334,6 +369,27 @@ export default function App() {
         )}
 
         {!!message && <p className="status">{message}</p>}
+
+        <div className="number-bar">
+          <p className="number-bar__label">Pick Number</p>
+          <div className="number-bar__buttons">
+            {NUMBER_RANGE.map((value) => {
+              const allowed = legalNumberChoices.includes(value)
+              const selected = selectedValue === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  className={`number-pill ${selected ? 'number-pill--selected' : ''}`}
+                  onClick={() => setSelectedValue(value)}
+                  disabled={!canPlayNow || !allowed}
+                >
+                  {value}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <div className="match-strip">
           <PlayerBadge user={selectedGame?.player_x} symbol="X" isBot={selectedGame?.bot_symbol === 'X'} />
@@ -351,7 +407,7 @@ export default function App() {
         </div>
 
         {selectedGame ? (
-          <GameBoard game={selectedGame} onPlay={handleMove} />
+          <GameBoard game={selectedGame} selectedValue={selectedValue} onPlay={handleMove} />
         ) : (
           <div className="empty-game">Pick an active game or start one from the lobby.</div>
         )}

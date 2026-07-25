@@ -242,6 +242,37 @@ select {
   margin: 0;
 }
 
+.number-bar {
+  margin: 10px 0 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.number-bar__label {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.number-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.number-pill {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.number-pill--selected {
+  border-color: rgba(255, 186, 102, 0.85);
+  box-shadow: 0 0 0 1px rgba(255, 186, 102, 0.3), 0 0 20px rgba(255, 186, 102, 0.22);
+}
+
 .bot-actions {
   display: flex;
   gap: 8px;
@@ -358,6 +389,12 @@ select {
   background: rgba(2, 14, 24, 0.86);
   font-family: 'Cinzel', serif;
   font-size: clamp(1.1rem, 2vw, 1.7rem);
+}
+
+.cell--filled {
+  color: #f6f7fa;
+  font-weight: 700;
+  background: linear-gradient(155deg, rgba(16, 37, 56, 0.9), rgba(12, 29, 45, 0.88));
 }
 
 .cell--x {
