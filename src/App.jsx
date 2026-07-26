@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   acceptInvite,
   cancelInvite,
-  createBotGame,
+  createBotGameWithModel,
   createInvite,
   fetchActivePlayers,
+  fetchBotModels,
   fetchGame,
   fetchGames,
   fetchIncomingInvites,
@@ -141,6 +142,8 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [selectedValue, setSelectedValue] = useState(null)
+  const [botModels, setBotModels] = useState(['v1'])
+  const [selectedBotModel, setSelectedBotModel] = useState('v1')
 
   const selectedGameId = selectedGame?.id || null
   const canPlayNow = selectedGame?.status === 'active' && selectedGame?.you_symbol && selectedGame?.you_symbol === selectedGame?.current_player
@@ -148,16 +151,24 @@ export default function App() {
   const botMoveSourceLabel = useMemo(() => getBotMoveSourceLabel(selectedGame), [selectedGame])
 
   const refreshLobby = async () => {
-    const [activePlayers, incoming, outgoing, activeGames] = await Promise.all([
+    const [activePlayers, incoming, outgoing, activeGames, availableModels] = await Promise.all([
       fetchActivePlayers(),
       fetchIncomingInvites(),
       fetchOutgoingInvites(),
       fetchGames('active'),
+      fetchBotModels().catch(() => ['v1']),
     ])
     setPlayers(activePlayers)
     setIncomingInvites(incoming)
     setOutgoingInvites(outgoing)
     setGames(activeGames)
+    const modelList = Array.isArray(availableModels) ? availableModels : null
+    if (modelList && modelList.length) {
+      setBotModels(modelList)
+      if (!modelList.includes(selectedBotModel)) {
+        setSelectedBotModel(modelList[0])
+      }
+    }
     if (!selectedGameId && activeGames.length) {
       setSelectedGame(activeGames[0])
     }
@@ -271,9 +282,9 @@ export default function App() {
     setBusy(true)
     setMessage('')
     try {
-      const game = await createBotGame(humanSymbol)
+      const game = await createBotGameWithModel(humanSymbol, selectedBotModel)
       setSelectedGame(game)
-      setMessage('Bot game created.')
+      setMessage(`Bot game created with ${selectedBotModel}.`)
       await refreshLobby()
     } catch (err) {
       setMessage(err.message || 'Unable to create bot game')
@@ -370,6 +381,11 @@ export default function App() {
             <p>Use numbers 1-9, keep each subgrid unique, and make 15-lines to claim boards.</p>
           </div>
           <div className="bot-actions">
+            <select value={selectedBotModel} onChange={(event) => setSelectedBotModel(event.target.value)}>
+              {botModels.map((model) => (
+                <option key={model} value={model}>{model}</option>
+              ))}
+            </select>
             <button disabled={busy} onClick={() => handleCreateBotGame('X')}>Play bot as X</button>
             <button disabled={busy} onClick={() => handleCreateBotGame('O')}>Play bot as O</button>
           </div>
@@ -416,6 +432,9 @@ export default function App() {
             <p className="match-strip__hint">
               {selectedGame?.next_board_row == null ? 'Free move anywhere' : `Must play in board ${selectedGame.next_board_row + 1}-${selectedGame.next_board_col + 1}`}
             </p>
+            {selectedGame?.mode === 'bot' && selectedGame?.bot_model_version && (
+              <p className="match-strip__hint">Model: {selectedGame.bot_model_version}</p>
+            )}
             {!!botMoveSourceLabel && <p className="match-strip__engine">{botMoveSourceLabel}</p>}
           </div>
           <PlayerBadge user={selectedGame?.player_o} symbol="O" isBot={selectedGame?.bot_symbol === 'O'} />

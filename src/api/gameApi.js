@@ -35,6 +35,13 @@ export const createBotGame = (humanSymbol = 'X') => request('/ultimate-ttt/games
   body: { human_symbol: humanSymbol },
 })
 
+export const fetchBotModels = () => request('/ultimate-ttt/models')
+
+export const createBotGameWithModel = (humanSymbol = 'X', modelVersion = 'v1') => request('/ultimate-ttt/games/bot', {
+  method: 'POST',
+  body: { human_symbol: humanSymbol, model_version: modelVersion },
+})
+
 export const fetchGames = (state = 'active') => request(`/ultimate-ttt/games?state=${encodeURIComponent(state)}`)
 export const fetchGame = (gameId) => request(`/ultimate-ttt/games/${gameId}`)
 export const submitMove = (gameId, move) => request(`/ultimate-ttt/games/${gameId}/moves`, {
