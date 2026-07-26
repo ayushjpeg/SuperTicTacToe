@@ -341,6 +341,14 @@ select {
   font-size: 0.9rem;
 }
 
+.match-strip__engine {
+  margin: 4px 0 0;
+  color: rgba(255, 208, 127, 0.95);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .board {
   display: grid;
   gap: 10px;

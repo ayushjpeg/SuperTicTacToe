@@ -42,6 +42,16 @@ const getLegalNumberChoices = (game) => {
   return NUMBER_RANGE.filter((value) => choices.has(value))
 }
 
+const getBotMoveSourceLabel = (game) => {
+  if (!game || game.mode !== 'bot') return ''
+  const lastMove = game.last_move_json || {}
+  if (!game.bot_symbol || lastMove.symbol !== game.bot_symbol) return ''
+
+  if (lastMove.source === 'model') return 'Bot source: model policy'
+  if (lastMove.source === 'random_fallback') return 'Bot source: random fallback'
+  return 'Bot source: unknown'
+}
+
 function PlayerBadge({ user, symbol, isBot }) {
   if (isBot) {
     return (
@@ -135,6 +145,7 @@ export default function App() {
   const selectedGameId = selectedGame?.id || null
   const canPlayNow = selectedGame?.status === 'active' && selectedGame?.you_symbol && selectedGame?.you_symbol === selectedGame?.current_player
   const legalNumberChoices = useMemo(() => getLegalNumberChoices(selectedGame), [selectedGame])
+  const botMoveSourceLabel = useMemo(() => getBotMoveSourceLabel(selectedGame), [selectedGame])
 
   const refreshLobby = async () => {
     const [activePlayers, incoming, outgoing, activeGames] = await Promise.all([
@@ -405,6 +416,7 @@ export default function App() {
             <p className="match-strip__hint">
               {selectedGame?.next_board_row == null ? 'Free move anywhere' : `Must play in board ${selectedGame.next_board_row + 1}-${selectedGame.next_board_col + 1}`}
             </p>
+            {!!botMoveSourceLabel && <p className="match-strip__engine">{botMoveSourceLabel}</p>}
           </div>
           <PlayerBadge user={selectedGame?.player_o} symbol="O" isBot={selectedGame?.bot_symbol === 'O'} />
         </div>
